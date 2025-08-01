@@ -1,0 +1,365 @@
+/* GameLobby 组件样式 */
+.game-lobby {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f172a 0%, #581c87 50%, #0f172a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  position: relative;
+}
+
+.background-decoration {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.background-orb-1 {
+  position: absolute;
+  top: 25%;
+  left: 25%;
+  width: 384px;
+  height: 384px;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 50%;
+  filter: blur(48px);
+  animation: pulse 2s infinite;
+}
+
+.background-orb-2 {
+  position: absolute;
+  bottom: 25%;
+  right: 25%;
+  width: 320px;
+  height: 320px;
+  background: rgba(147, 51, 234, 0.1);
+  border-radius: 50%;
+  filter: blur(48px);
+  animation: pulse 2s infinite;
+  animation-delay: 1s;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.main-container {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 896px;
+  margin: 0 auto;
+}
+
+.title-section {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.main-title {
+  font-size: 3.75rem;
+  font-weight: bold;
+  margin-bottom: 16px;
+  background: linear-gradient(to right, #fbbf24, #f97316, #ef4444);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  line-height: 1.2;
+}
+
+.subtitle {
+  font-size: 1.25rem;
+  color: #cbd5e1;
+  font-weight: 300;
+}
+
+.content-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 32px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.player-input-section {
+  margin-bottom: 32px;
+}
+
+.input-container {
+  position: relative;
+}
+
+.player-input {
+  width: 100%;
+  padding: 16px 24px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  color: white;
+  font-size: 1.125rem;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.player-input:focus {
+  border-color: rgba(251, 191, 36, 0.5);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.floating-label {
+  position: absolute;
+  left: 24px;
+  transition: all 0.3s ease;
+  pointer-events: none;
+  color: #94a3b8;
+}
+
+.floating-label.focused {
+  top: -8px;
+  font-size: 0.875rem;
+  color: #fbbf24;
+  background: #0f172a;
+  padding: 0 8px;
+  border-radius: 4px;
+}
+
+.floating-label.normal {
+  top: 16px;
+  font-size: 1.125rem;
+}
+
+.input-hint {
+  font-size: 0.875rem;
+  color: #94a3b8;
+  margin-top: 8px;
+  margin-left: 8px;
+}
+
+.game-modes-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+@media (min-width: 768px) {
+  .game-modes-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.game-mode-card {
+  position: relative;
+  border-radius: 16px;
+  padding: 32px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid;
+}
+
+.local-game-card {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(6, 182, 212, 0.2));
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.local-game-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 25px 50px -12px rgba(59, 130, 246, 0.25);
+}
+
+.online-game-card {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(20, 184, 166, 0.2));
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.online-game-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 25px 50px -12px rgba(16, 185, 129, 0.25);
+}
+
+.card-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 16px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.local-game-card:hover .card-overlay {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(6, 182, 212, 0.1));
+  opacity: 1;
+}
+
+.online-game-card:hover .card-overlay {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(20, 184, 166, 0.1));
+  opacity: 1;
+}
+
+.card-content {
+  position: relative;
+  z-index: 10;
+}
+
+.icon-container {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  transition: transform 0.3s ease;
+}
+
+.game-mode-card:hover .icon-container {
+  transform: scale(1.1);
+}
+
+.local-icon {
+  background: linear-gradient(135deg, #3b82f6, #06b6d4);
+}
+
+.online-icon {
+  background: linear-gradient(135deg, #10b981, #14b8a6);
+}
+
+.card-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 12px;
+}
+
+.card-description {
+  color: #cbd5e1;
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+.card-action {
+  display: inline-flex;
+  align-items: center;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.local-action {
+  color: #60a5fa;
+}
+
+.local-game-card:hover .local-action {
+  color: #93c5fd;
+}
+
+.online-action {
+  color: #34d399;
+}
+
+.online-game-card:hover .online-action {
+  color: #6ee7b7;
+}
+
+.action-arrow {
+  width: 20px;
+  height: 20px;
+  margin-left: 8px;
+  transition: transform 0.3s ease;
+}
+
+.game-mode-card:hover .action-arrow {
+  transform: translateX(4px);
+}
+
+.bottom-features {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 768px) {
+  .bottom-features {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.feature-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.feature-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.feature-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+}
+
+.feature-card:hover .feature-icon {
+  transform: scale(1.1);
+}
+
+.rules-icon {
+  background: linear-gradient(135deg, #8b5cf6, #ec4899);
+}
+
+.stats-icon {
+  background: linear-gradient(135deg, #f97316, #ef4444);
+}
+
+.feature-text h4 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 4px;
+}
+
+.feature-text p {
+  color: #94a3b8;
+  font-size: 0.875rem;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .main-title {
+    font-size: 2.5rem;
+  }
+  
+  .content-card {
+    padding: 24px;
+  }
+  
+  .game-mode-card {
+    padding: 24px;
+  }
+}

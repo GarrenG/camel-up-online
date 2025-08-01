@@ -1,0 +1,280 @@
+/* GameEndModal 组件样式 */
+
+/* 模态框遮罩层 */
+.game-end-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 32px;
+  z-index: 99999;
+}
+
+/* 主模态框容器 */
+.game-end-modal {
+  background-color: white;
+  border-radius: 12px;
+  padding: 32px;
+  max-width: 448px;
+  width: 100%;
+  margin: 0 16px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* 标题区域 */
+.game-end-title {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.game-end-title h2 {
+  font-size: 30px;
+  font-weight: bold;
+  color: #1f2937;
+  margin-bottom: 8px;
+}
+
+.game-end-title p {
+  color: #6b7280;
+}
+
+/* 排行榜容器 */
+.leaderboard {
+  margin-bottom: 24px;
+}
+
+.leaderboard-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-radius: 12px;
+  border: 2px solid;
+  margin-bottom: 12px;
+}
+
+/* 排名样式 */
+.leaderboard-item.rank-1 {
+  background-color: #fefce8;
+  border-color: #fde047;
+}
+
+.leaderboard-item.rank-2 {
+  background-color: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.leaderboard-item.rank-3 {
+  background-color: #fff7ed;
+  border-color: #fed7aa;
+}
+
+.leaderboard-item.rank-other {
+  background-color: #f9fafb;
+  border-color: #e5e7eb;
+}
+
+/* 玩家信息左侧 */
+.player-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.rank-badge {
+  font-size: 24px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.player-details .player-name {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.player-details .bot-label {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* 金币信息右侧 */
+.coin-info {
+  text-align: right;
+}
+
+.coin-amount {
+  font-size: 20px;
+  font-weight: bold;
+  color: #d97706;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.coin-amount:hover {
+  color: #b45309;
+}
+
+.coin-label {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* 返回按钮 */
+.return-button {
+  background-color: #3b82f6;
+  color: white;
+  font-weight: 600;
+  padding: 12px 32px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: block;
+  margin: 0 auto;
+}
+
+.return-button:hover {
+  background-color: #2563eb;
+}
+
+/* 底部文字 */
+.congratulations {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* 金币详情弹窗 */
+.coin-detail-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100000;
+}
+
+.coin-detail-modal {
+  background-color: white;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 448px;
+  width: 100%;
+  margin: 0 16px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.coin-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.coin-detail-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.close-button {
+  color: #6b7280;
+  font-size: 20px;
+  font-weight: bold;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.close-button:hover {
+  color: #374151;
+}
+
+/* 金币详情列表 */
+.coin-breakdown {
+  max-height: 256px;
+  overflow-y: auto;
+  margin-bottom: 16px;
+}
+
+.coin-source-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px;
+  background-color: #f9fafb;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.coin-source-description {
+  font-size: 14px;
+  color: #374151;
+}
+
+.coin-source-amount {
+  font-weight: 600;
+}
+
+.coin-source-amount.positive {
+  color: #059669;
+}
+
+.coin-source-amount.negative {
+  color: #dc2626;
+}
+
+/* 总计区域 */
+.coin-total {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.coin-total-label {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.coin-total-amount {
+  font-size: 20px;
+  font-weight: bold;
+  color: #d97706;
+}
+
+/* 关闭按钮 */
+.detail-close-button {
+  background-color: #6b7280;
+  color: white;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: block;
+  margin: 16px auto 0;
+}
+
+.detail-close-button:hover {
+  background-color: #4b5563;
+}

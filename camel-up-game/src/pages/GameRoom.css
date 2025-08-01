@@ -1,0 +1,445 @@
+/* GameRoom 组件样式 */
+
+/* 文本颜色 */
+.text-green {
+  color: #16a34a;
+}
+
+.text-yellow {
+  color: #ca8a04;
+}
+
+/* 主容器 */
+.game-room {
+  min-height: 100vh;
+  padding: 16px;
+  background: linear-gradient(135deg, #0f172a 0%, #581c87 50%, #0f172a 100%);
+}
+
+.game-room-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* 房间标题栏 */
+.room-header-card {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.room-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.room-title-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.back-button {
+  background-color: #6b7280;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.back-button:hover {
+  background-color: #4b5563;
+}
+
+.room-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.room-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 14px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.room-info-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.room-status-waiting {
+  color: #16a34a;
+}
+
+.room-status-private {
+  color: #dc2626;
+}
+
+.room-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.settings-button {
+  background-color: #6b7280;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.settings-button:hover {
+  background-color: #4b5563;
+}
+
+.start-game-button {
+  background-color: #16a34a;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 24px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.start-game-button:hover {
+  background-color: #15803d;
+}
+
+.start-game-button:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.ready-toggle-button {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 24px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.ready-toggle-button.ready {
+  background-color: #dc2626;
+  color: white;
+}
+
+.ready-toggle-button.ready:hover {
+  background-color: #b91c1c;
+}
+
+.ready-toggle-button.not-ready {
+  background-color: #16a34a;
+  color: white;
+}
+
+.ready-toggle-button.not-ready:hover {
+  background-color: #15803d;
+}
+
+/* 玩家列表 */
+.players-section {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  padding: 24px;
+}
+
+.players-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 0 0 16px 0;
+}
+
+.players-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+/* 玩家卡片 */
+.player-card {
+  border: 2px solid;
+  border-radius: 8px;
+  padding: 16px;
+  transition: all 0.3s ease;
+}
+
+.player-card.player-ready {
+  border-color: #16a34a;
+  background-color: #f0fdf4;
+}
+
+.player-card.player-waiting {
+  border-color: #eab308;
+  background-color: #fefce8;
+}
+
+.player-card-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.player-info {
+  flex: 1;
+}
+
+.player-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.player-name {
+  font-weight: 600;
+  margin: 0;
+}
+
+.player-badge {
+  background-color: #3b82f6;
+  color: white;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.player-details {
+  font-size: 14px;
+  color: #6b7280;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.player-status {
+  font-weight: 500;
+}
+
+.player-status.status-ready {
+  color: #16a34a;
+}
+
+.player-status.status-waiting {
+  color: #eab308;
+}
+
+.player-actions {
+  margin-left: 8px;
+}
+
+.kick-button {
+  color: #ef4444;
+  font-size: 14px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.kick-button:hover {
+  color: #b91c1c;
+}
+
+/* 空位 */
+.empty-slot {
+  border: 2px dashed #d1d5db;
+  border-radius: 8px;
+  padding: 16px;
+  background-color: #f9fafb;
+  text-align: center;
+}
+
+.empty-slot-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.empty-slot-icon {
+  opacity: 0.5;
+}
+
+.empty-slot-text {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0 0 12px 0;
+}
+
+.add-bot-button {
+  background-color: #6b7280;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.add-bot-button:hover {
+  background-color: #4b5563;
+}
+
+/* 游戏规则和设置 */
+.game-rules {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  padding: 24px;
+  margin-top: 24px;
+}
+
+.rules-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #92400e;
+  margin: 0 0 16px 0;
+}
+
+.rules-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.rules-list li {
+  color: #6b7280;
+  margin-bottom: 8px;
+  padding-left: 16px;
+  position: relative;
+}
+
+.rules-list li:before {
+  content: "•";
+  color: #d97706;
+  font-weight: bold;
+  position: absolute;
+  left: 0;
+}
+
+/* 设置模态框 */
+.settings-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.settings-content {
+  background-color: white;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 400px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.settings-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 0 0 16px 0;
+}
+
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-label {
+  font-weight: 500;
+  color: #374151;
+}
+
+.form-input {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.form-input:focus {
+  border-color: #d97706;
+}
+
+.settings-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.cancel-button {
+  background-color: #6b7280;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.cancel-button:hover {
+  background-color: #4b5563;
+}
+
+.save-button {
+  background-color: #d97706;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.save-button:hover {
+  background-color: #b45309;
+}
