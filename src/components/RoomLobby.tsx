@@ -28,6 +28,7 @@ const RoomLobby: React.FC<RoomLobbyProps> = ({
 }) => {
   const [isReady, setIsReady] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
+  const [isStarting, setIsStarting] = useState(false);
 
   const handleReadyToggle = () => {
     const newReadyState = !isReady;
@@ -36,7 +37,10 @@ const RoomLobby: React.FC<RoomLobbyProps> = ({
   };
 
   const handleStartGame = () => {
+    if (isStarting) return; // 防止重复点击
+    setIsStarting(true);
     startGame();
+    // 游戏开始后会跳转到游戏界面，组件会卸载，不需要手动重置状态
   };
 
   const handleLeaveRoom = () => {
@@ -215,11 +219,11 @@ const RoomLobby: React.FC<RoomLobbyProps> = ({
               {isHost && (
                 <button
                   onClick={handleStartGame}
-                  disabled={!isConnected || !canStartGame}
+                  disabled={!isConnected || !canStartGame || isStarting}
                   className="start-button"
                 >
                   <Play className="icon-md" />
-                  {canStartGame ? '开始游戏' : '等待玩家准备'}
+                  {isStarting ? '启动中...' : (canStartGame ? '开始游戏' : '等待玩家准备')}
                 </button>
               )}
             </div>

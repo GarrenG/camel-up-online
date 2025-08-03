@@ -12,11 +12,21 @@ interface UseSocketReturn {
   joinRoom: (roomId: string, playerId: string, playerName: string) => void;
   setPlayerReady: (ready: boolean) => void;
   startGame: () => void;
-  sendGameAction: (action: any) => void;
+  sendGameAction: (action: string, data?: any) => void;
   leaveRoom: () => void;
 }
 
-const SERVER_URL = 'http://localhost:3001';
+// 动态获取服务器URL，支持本地开发和外部访问
+const getServerUrl = () => {
+  // 如果是开发环境或本地访问，使用localhost
+  if (process.env.NODE_ENV === 'development' || window.location.hostname === 'localhost') {
+    return 'http://localhost:3001';
+  }
+  // 生产环境使用当前域名的3001端口
+  return `http://${window.location.hostname}:3001`;
+};
+
+const SERVER_URL = getServerUrl();
 
 export const useSocket = (playerId?: string): UseSocketReturn => {
   const socketRef = useRef<Socket | null>(null);
@@ -152,12 +162,13 @@ export const useSocket = (playerId?: string): UseSocketReturn => {
     }
   };
 
-  const sendGameAction = (action: any) => {
+  const sendGameAction = (action: string, data?: any) => {
     if (socketRef.current && currentRoom && playerId) {
       socketRef.current.emit('game-action', {
         roomId: currentRoom.id,
         playerId,
-        action
+        action,
+        actionData: data || {}
       });
     }
   };

@@ -43,10 +43,21 @@ const RoomManager: React.FC<RoomManagerProps> = ({
     return `${randomAdjective}${randomNoun}${randomNumber}`;
   };
 
+  // 动态获取服务器URL，与useSocket保持一致
+  const getServerUrl = () => {
+    // 如果是开发环境或本地访问，使用localhost
+    if (process.env.NODE_ENV === 'development' || window.location.hostname === 'localhost') {
+      return 'http://localhost:3001';
+    }
+    // 生产环境使用当前域名的3001端口
+    return `http://${window.location.hostname}:3001`;
+  };
+
   // 获取可用房间列表
   const fetchAvailableRooms = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/rooms');
+      const serverUrl = getServerUrl();
+      const response = await fetch(`${serverUrl}/api/rooms`);
       if (response.ok) {
         const rooms = await response.json();
         setAvailableRooms(rooms.filter((room: RoomInfo) => !room.isGameStarted));

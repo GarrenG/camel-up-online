@@ -8,9 +8,19 @@ interface GameBoardProps {
   room: GameRoom;
   currentPlayer: Player;
   onLeaveGame: () => void;
+  isOnlineMode?: boolean;
+  socket?: any;
+  sendGameAction?: (action: string, data?: any) => void;
 }
 
-const GameBoard: React.FC<GameBoardProps> = ({ room, currentPlayer, onLeaveGame }) => {
+const GameBoard: React.FC<GameBoardProps> = ({ 
+  room, 
+  currentPlayer, 
+  onLeaveGame, 
+  isOnlineMode = false, 
+  socket, 
+  sendGameAction 
+}) => {
   const { rollDice, placeBet, placeChampionBet, placeLoserBet, placeTrackTile } = useGameStore();
   const [selectedBetType, setSelectedBetType] = useState<BetType>(BetType.ROUND);
   const [selectedTileType, setSelectedTileType] = useState<TrackTileType>(TrackTileType.ACCELERATE);
@@ -69,36 +79,74 @@ const GameBoard: React.FC<GameBoardProps> = ({ room, currentPlayer, onLeaveGame 
   
   const handleRollDice = () => {
     if (!isCurrentPlayerTurn) return;
-    if (debugMode && isGarren && selectedDebugDice && selectedDebugSteps) {
-      rollDice(selectedDebugDice, selectedDebugSteps);
-      setSelectedDebugDice(null);
-      setSelectedDebugSteps(null);
+    
+    if (isOnlineMode && sendGameAction) {
+      // 在线模式：发送游戏动作到服务器
+      if (debugMode && isGarren && selectedDebugDice && selectedDebugSteps) {
+        sendGameAction('roll-dice', { debugDice: selectedDebugDice, debugSteps: selectedDebugSteps });
+        setSelectedDebugDice(null);
+        setSelectedDebugSteps(null);
+      } else {
+        sendGameAction('roll-dice');
+      }
     } else {
-      rollDice();
+      // 本地模式：直接调用本地游戏逻辑
+      if (debugMode && isGarren && selectedDebugDice && selectedDebugSteps) {
+        rollDice(selectedDebugDice, selectedDebugSteps);
+        setSelectedDebugDice(null);
+        setSelectedDebugSteps(null);
+      } else {
+        rollDice();
+      }
     }
   };
   
   const handlePlaceBet = (camelColor: CamelColor, betType: BetType) => {
     if (!isCurrentPlayerTurn) return;
     
-    if (betType === BetType.WINNER) {
-      placeChampionBet(currentPlayer.id, camelColor);
-    } else if (betType === BetType.LOSER) {
-      placeLoserBet(currentPlayer.id, camelColor);
+    if (isOnlineMode && sendGameAction) {
+      // 在线模式：发送游戏动作到服务器
+      if (betType === BetType.WINNER) {
+        sendGameAction('place-champion-bet', { camelColor });
+      } else if (betType === BetType.LOSER) {
+        sendGameAction('place-loser-bet', { camelColor });
+      } else {
+        const betCard: BetCard = {
+          id: `${betType}-${camelColor}-${Date.now()}`,
+          type: betType,
+          camelColor,
+          value: 5
+        };
+        sendGameAction('place-bet', { betCard });
+      }
     } else {
-      const betCard: BetCard = {
-        id: `${betType}-${camelColor}-${Date.now()}`,
-        type: betType,
-        camelColor,
-        value: 5
-      };
-      placeBet(currentPlayer.id, betCard);
+      // 本地模式：直接调用本地游戏逻辑
+      if (betType === BetType.WINNER) {
+        placeChampionBet(currentPlayer.id, camelColor);
+      } else if (betType === BetType.LOSER) {
+        placeLoserBet(currentPlayer.id, camelColor);
+      } else {
+        const betCard: BetCard = {
+          id: `${betType}-${camelColor}-${Date.now()}`,
+          type: betType,
+          camelColor,
+          value: 5
+        };
+        placeBet(currentPlayer.id, betCard);
+      }
     }
   };
   
   const handlePlaceTrackTile = (position: number, tileType: TrackTileType) => {
     if (!isCurrentPlayerTurn || position < 1 || position > 15) return;
-    placeTrackTile(currentPlayer.id, position, tileType);
+    
+    if (isOnlineMode && sendGameAction) {
+      // 在线模式：发送游戏动作到服务器
+      sendGameAction('place-track-tile', { position, tileType });
+    } else {
+      // 本地模式：直接调用本地游戏逻辑
+      placeTrackTile(currentPlayer.id, position, tileType);
+    }
   };
   
   // 渲染赛道格子
@@ -422,7 +470,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ room, currentPlayer, onLeaveGame 
                                             {action.description}
                                           </div>
                                           <div style={{color: '#9ca3af', fontSize: '12px', marginTop: '4px'}}>
-                                            {action.timestamp.toLocaleTimeString()}
+                                            {new Date(action.timestamp).toLocaleTimeString()}
                                           </div>
                                         </div>
                                       );

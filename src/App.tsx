@@ -204,7 +204,8 @@ function App() {
   };
 
   // 在线模式处理函数
-  const handleSelectOnlineMode = () => {
+  const handleSelectOnlineMode = (playerName: string) => {
+    setPlayerName(playerName);
     setGameMode('online');
     setGameState('online-lobby');
   };
@@ -238,12 +239,24 @@ function App() {
 
   // 监听在线游戏状态变化
   React.useEffect(() => {
-    if (gameMode === 'online' && onlineGameState && onlineGameState.status === GameStatus.PLAYING) {
-      if (gameState === 'online-room') {
-        setGameState('online-playing');
-      }
+    console.log('在线游戏状态变化:', {
+      gameMode,
+      onlineGameState: onlineGameState ? {
+        status: onlineGameState.status,
+        id: onlineGameState.id
+      } : null,
+      currentGameState: gameState
+    });
+    
+    // 只有当游戏模式为在线，游戏状态为PLAYING，且当前状态为online-room时才切换
+    if (gameMode === 'online' && 
+        onlineGameState && 
+        onlineGameState.status === GameStatus.PLAYING && 
+        gameState === 'online-room') {
+      console.log('检测到游戏开始，切换到游戏界面');
+      setGameState('online-playing');
     }
-  }, [onlineGameState, gameMode, gameState]);
+  }, [onlineGameState, gameMode]); // 移除gameState依赖，避免循环
 
   const handleBackToModeSelection = () => {
     setGameState('lobby');
@@ -288,19 +301,15 @@ function App() {
         />
       )}
 
-      {gameState === 'online-playing' && (
-        <div className="online-playing-container">
-          <div className="online-playing-content">
-            <h1 className="online-playing-title">在线游戏进行中</h1>
-            <p className="online-playing-description">在线游戏功能正在开发中...</p>
-            <button
-              onClick={handleLeaveOnlineRoom}
-              className="online-playing-back-button"
-            >
-              返回房间
-            </button>
-          </div>
-        </div>
+      {gameState === 'online-playing' && onlineGameState && (
+        <GameBoard
+          room={onlineGameState}
+          currentPlayer={onlineGameState.players.find(p => p.id === playerId) || onlineGameState.players[0]}
+          onLeaveGame={handleLeaveOnlineRoom}
+          isOnlineMode={true}
+          socket={socket}
+          sendGameAction={sendGameAction}
+        />
       )}
       
       {gameState === 'room' && currentRoom && currentPlayer && (

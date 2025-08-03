@@ -5,7 +5,7 @@ import './GameLobby.css';
 interface GameLobbyProps {
   playerName: string;
   onCreateRoom: (playerName: string) => void;
-  onSelectOnlineMode?: () => void;
+  onSelectOnlineMode?: (playerName: string) => void;
   onShowRules?: () => void;
 }
 
@@ -109,7 +109,10 @@ const GameLobby: React.FC<GameLobbyProps> = ({
 
             {/* 在线对战 */}
             <div 
-              onClick={onSelectOnlineMode}
+              onClick={() => {
+                const finalPlayerName = playerName.trim() || generateRandomPlayerName();
+                onSelectOnlineMode?.(finalPlayerName);
+              }}
               className="game-mode-card online-game-card"
             >
               <div className="card-overlay"></div>
