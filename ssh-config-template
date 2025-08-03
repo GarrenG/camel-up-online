@@ -1,0 +1,18 @@
+# SSH配置模板
+# 将此内容添加到 ~/.ssh/config 文件中
+
+# 阿里云服务器配置
+Host aliyun
+    HostName your_server_ip          # 替换为您的服务器IP
+    User your_username               # 替换为您的用户名
+    IdentityFile ~/.ssh/id_rsa       # SSH私钥路径
+    ServerAliveInterval 60           # 保持连接活跃
+    ServerAliveCountMax 3            # 最大重试次数
+    StrictHostKeyChecking no         # 首次连接不询问
+    UserKnownHostsFile /dev/null     # 不保存主机密钥（可选）
+
+# 使用方法：
+# 1. 复制此文件内容到 ~/.ssh/config
+# 2. 修改 HostName 和 User 为您的实际值
+# 3. 确保已将公钥添加到服务器
+# 4. 测试连接：ssh aliyun

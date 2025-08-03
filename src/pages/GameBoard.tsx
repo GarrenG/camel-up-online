@@ -447,7 +447,7 @@ const GameBoard: React.FC<GameBoardProps> = ({
                               {!isCollapsed && (
                                 <div style={{padding: '8px'}}>
                                   {actions
-                                    .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+                                    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
                                     .map((action) => {
                                       const player = room.players.find(p => p.id === action.playerId);
                                       const playerName = action.playerId === 'system' ? '系统' : (player?.name || '未知玩家');
