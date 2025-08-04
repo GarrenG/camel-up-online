@@ -364,6 +364,88 @@ io.on('connection', (socket) => {
     }
   });
 
+  // 离开房间
+  socket.on('leave-room', (data) => {
+    const { roomId, playerId } = data;
+    const room = rooms.get(roomId);
+    
+    if (room) {
+      const player = room.players.find(p => p.id === playerId);
+      if (player) {
+        // 标记玩家为离线状态，但不删除
+        player.isOnline = false;
+        player.socketId = null;
+        
+        socket.leave(roomId);
+        
+        // 通知其他玩家
+        io.to(roomId).emit('player-left', { 
+          playerId: player.id,
+          room 
+        });
+        
+        console.log(`玩家 ${player.name} 离开房间 ${roomId}`);
+      }
+    }
+  });
+  
+  // 重连房间
+  socket.on('reconnect-room', (data) => {
+    const { roomId, playerId, playerName } = data;
+    const room = rooms.get(roomId);
+    
+    if (!room) {
+      socket.emit('join-room-error', { error: '房间不存在' });
+      return;
+    }
+    
+    // 查找是否是之前的玩家
+    const existingPlayer = room.players.find(p => p.id === playerId);
+    
+    if (existingPlayer) {
+      // 重连现有玩家
+      existingPlayer.isOnline = true;
+      existingPlayer.socketId = socket.id;
+      
+      socket.join(roomId);
+      
+      // 发送房间状态
+      if (room.gameState && room.gameState.status === 'playing') {
+        socket.emit('game-started', { gameState: room.gameState });
+      } else {
+        socket.emit('room-joined', { room });
+      }
+      
+      // 通知其他玩家
+      socket.to(roomId).emit('player-joined', { room });
+      
+      console.log(`玩家 ${playerName} 重连到房间 ${roomId}`);
+    } else {
+      // 作为新玩家加入
+      if (room.players.length >= room.maxPlayers) {
+        socket.emit('join-room-error', { error: '房间已满' });
+        return;
+      }
+      
+      const newPlayer = {
+        id: playerId,
+        name: playerName,
+        isHost: false,
+        isReady: false,
+        socketId: socket.id,
+        isOnline: true
+      };
+      
+      room.addPlayer(newPlayer);
+      socket.join(roomId);
+      
+      socket.emit('room-joined', { room });
+      socket.to(roomId).emit('player-joined', { room });
+      
+      console.log(`新玩家 ${playerName} 加入房间 ${roomId}`);
+    }
+  });
+
   // 断线处理
   socket.on('disconnect', () => {
     console.log('用户断开连接:', socket.id);
@@ -372,23 +454,21 @@ io.on('connection', (socket) => {
     for (const [roomId, room] of rooms.entries()) {
       const player = room.players.find(p => p.socketId === socket.id);
       if (player) {
-        if (room.players.length === 1) {
-          // 如果是最后一个玩家，删除房间
-          rooms.delete(roomId);
-          console.log(`房间 ${roomId} 已删除`);
-        } else {
-          // 移除玩家并通知其他玩家
-          room.removePlayer(player.id);
-          io.to(roomId).emit('player-left', { 
-            playerId: player.id,
-            room 
-          });
-          console.log(`玩家 ${player.name} 离开房间 ${roomId}`);
-        }
+        // 标记为离线，但保留玩家数据
+        player.isOnline = false;
+        player.socketId = null;
+        
+        // 通知其他玩家
+        io.to(roomId).emit('player-left', { 
+          playerId: player.id,
+          room 
+        });
+        
+        console.log(`玩家 ${player.name} 断线离开房间 ${roomId}`);
         break;
       }
     }
-  });
+  });}]}}}
 });
 
 // 初始化7只骆驼（5只参赛骆驼 + 2只反向骆驼）

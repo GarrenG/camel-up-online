@@ -10,6 +10,8 @@ interface RoomManagerProps {
   createRoom: (playerId: string, playerName: string) => void;
   joinRoom: (roomId: string, playerId: string, playerName: string) => void;
   onRoomJoined: () => void;
+  onBackToMainMenu?: () => void;
+  lastRoomId?: string | null;
 }
 
 interface RoomInfo {
@@ -28,10 +30,13 @@ const RoomManager: React.FC<RoomManagerProps> = ({
   isLoading, 
   createRoom, 
   joinRoom, 
-  onRoomJoined 
+  onRoomJoined,
+  onBackToMainMenu,
+  lastRoomId
 }) => {
   const [roomId, setRoomId] = useState('');
   const [availableRooms, setAvailableRooms] = useState<RoomInfo[]>([]);
+  const [canReconnect, setCanReconnect] = useState(false);
   
   // 生成随机玩家名
   const generateRandomPlayerName = () => {
@@ -76,6 +81,11 @@ const RoomManager: React.FC<RoomManagerProps> = ({
     }
   }, [isConnected]);
 
+  useEffect(() => {
+    // 检查是否可以重连
+    setCanReconnect(!!lastRoomId && isConnected);
+  }, [lastRoomId, isConnected]);
+
   const handleCreateRoom = () => {
     if (!isConnected) {
       alert('请等待连接到服务器');
@@ -106,6 +116,13 @@ const RoomManager: React.FC<RoomManagerProps> = ({
     joinRoom(finalRoomId, playerId, finalPlayerName);
   };
 
+  const handleReconnectRoom = () => {
+    if (!lastRoomId) return;
+    
+    const finalPlayerName = playerName.trim() || generateRandomPlayerName();
+    joinRoom(lastRoomId, playerId, finalPlayerName);
+  };
+
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -124,7 +141,18 @@ const RoomManager: React.FC<RoomManagerProps> = ({
       <div className="room-manager-container">
         {/* 标题和连接状态 */}
         <div className="header-section">
-          <h1 className="main-title">骆驼快跑 - 多人在线</h1>
+          <div className="title-row">
+            <h1 className="main-title">骆驼快跑 - 多人在线</h1>
+            {onBackToMainMenu && (
+              <button
+                onClick={onBackToMainMenu}
+                className="back-to-main-button"
+                title="返回主菜单"
+              >
+                ← 返回主菜单
+              </button>
+            )}
+          </div>
           <div className="connection-status">
             {isConnected ? (
               <>
@@ -140,6 +168,28 @@ const RoomManager: React.FC<RoomManagerProps> = ({
           </div>
           <p className="player-info">玩家: <span className="player-name">{playerName}</span></p>
         </div>
+
+        {/* 重连房间 */}
+        {canReconnect && (
+          <div className="reconnect-section">
+            <div className="reconnect-card">
+              <h2 className="card-title">
+                <LogIn className="icon-lg" />
+                重连房间
+              </h2>
+              <p className="card-description">
+                检测到您之前在房间 {lastRoomId} 中，是否要重新连接？
+              </p>
+              <button
+                onClick={handleReconnectRoom}
+                disabled={!isConnected || isLoading}
+                className="reconnect-button"
+              >
+                重连房间 {lastRoomId}
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="actions-grid">
           {/* 创建房间 */}

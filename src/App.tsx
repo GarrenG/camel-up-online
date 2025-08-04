@@ -11,6 +11,7 @@ import RoomManager from './components/RoomManager';
 import RoomLobby from './components/RoomLobby';
 import { toast, Toaster } from 'sonner';
 import './App.css';
+import './animations.css';
 
 type GameState = 'lobby' | 'room' | 'playing' | 'online-lobby' | 'online-room' | 'online-playing';
 type GameMode = 'local' | 'online';
@@ -35,7 +36,8 @@ function App() {
     setPlayerReady,
     startGame: startOnlineGame,
     sendGameAction,
-    leaveRoom
+    leaveRoom,
+    lastRoomId
   } = useSocket(playerId);
   
   const handleJoinRoom = (room: GameRoom) => {
@@ -285,6 +287,8 @@ function App() {
           createRoom={createRoom}
           joinRoom={joinRoom}
           onRoomJoined={handleOnlineRoomJoined}
+          onBackToMainMenu={handleBackToModeSelection}
+          lastRoomId={lastRoomId}
         />
       )}
 
@@ -298,6 +302,7 @@ function App() {
           startGame={startOnlineGame}
           onGameStart={handleOnlineGameStart}
           onLeaveRoom={handleLeaveOnlineRoom}
+          onBackToMainMenu={handleBackToModeSelection}
         />
       )}
 
@@ -309,6 +314,7 @@ function App() {
           isOnlineMode={true}
           socket={socket}
           sendGameAction={sendGameAction}
+          onBackToMainMenu={handleBackToModeSelection}
         />
       )}
       
@@ -330,6 +336,7 @@ function App() {
           room={currentRoom}
           currentPlayer={currentPlayer}
           onLeaveGame={handleLeaveGame}
+          onBackToMainMenu={handleBackToModeSelection}
         />
       )}
       

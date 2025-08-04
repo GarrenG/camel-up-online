@@ -14,6 +14,8 @@ interface UseSocketReturn {
   startGame: () => void;
   sendGameAction: (action: string, data?: any) => void;
   leaveRoom: () => void;
+  reconnectToRoom: (roomId: string, playerId: string, playerName: string) => void;
+  lastRoomId: string | null;
 }
 
 // 动态获取服务器URL，支持本地开发和外部访问
@@ -34,6 +36,7 @@ export const useSocket = (playerId?: string): UseSocketReturn => {
   const [currentRoom, setCurrentRoom] = useState<GameRoom | null>(null);
   const [gameState, setGameState] = useState<GameRoom | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [lastRoomId, setLastRoomId] = useState<string | null>(null);
 
   useEffect(() => {
     // 创建Socket连接
@@ -67,12 +70,14 @@ export const useSocket = (playerId?: string): UseSocketReturn => {
     socket.on('room-created', (data) => {
       console.log('房间创建成功:', data);
       setCurrentRoom(data.room);
+      setLastRoomId(data.room.id);
       setIsLoading(false);
     });
 
     socket.on('room-joined', (data) => {
       console.log('加入房间成功:', data);
       setCurrentRoom(data.room);
+      setLastRoomId(data.room.id);
       setIsLoading(false);
     });
 
@@ -107,6 +112,7 @@ export const useSocket = (playerId?: string): UseSocketReturn => {
     socket.on('game-started', (data) => {
       console.log('游戏开始:', data);
       setGameState(data.gameState);
+      setLastRoomId(data.gameState.id);
     });
 
     socket.on('game-state-updated', (data) => {
@@ -175,9 +181,19 @@ export const useSocket = (playerId?: string): UseSocketReturn => {
 
   const leaveRoom = () => {
     if (socketRef.current && currentRoom) {
-      socketRef.current.disconnect();
+      socketRef.current.emit('leave-room', {
+        roomId: currentRoom.id,
+        playerId
+      });
       setCurrentRoom(null);
       setGameState(null);
+    }
+  };
+
+  const reconnectToRoom = (roomId: string, playerId: string, playerName: string) => {
+    if (socketRef.current) {
+      setIsLoading(true);
+      socketRef.current.emit('reconnect-room', { roomId, playerId, playerName });
     }
   };
 
@@ -192,7 +208,9 @@ export const useSocket = (playerId?: string): UseSocketReturn => {
     setPlayerReady,
     startGame,
     sendGameAction,
-    leaveRoom
+    leaveRoom,
+    reconnectToRoom,
+    lastRoomId
   };
 };
 

@@ -12,6 +12,7 @@ interface RoomLobbyProps {
   startGame: () => void;
   onGameStart: () => void;
   onLeaveRoom: () => void;
+  onBackToMainMenu?: () => void;
 }
 
 
@@ -24,7 +25,8 @@ const RoomLobby: React.FC<RoomLobbyProps> = ({
   setPlayerReady,
   startGame,
   onGameStart, 
-  onLeaveRoom 
+  onLeaveRoom,
+  onBackToMainMenu 
 }) => {
   const [isReady, setIsReady] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
@@ -106,13 +108,24 @@ const RoomLobby: React.FC<RoomLobbyProps> = ({
                   </>
                 )}
               </div>
-              <button
-                onClick={handleLeaveRoom}
-                className="leave-button"
-              >
-                <LogOut className="icon-sm" />
-                离开房间
-              </button>
+              <div className="header-buttons">
+                <button
+                  onClick={handleLeaveRoom}
+                  className="leave-button"
+                >
+                  <LogOut className="icon-sm" />
+                  离开房间
+                </button>
+                {onBackToMainMenu && (
+                  <button
+                    onClick={onBackToMainMenu}
+                    className="back-to-main-button"
+                    title="返回主菜单"
+                  >
+                    ← 主菜单
+                  </button>
+                )}
+              </div>
             </div>
           </div>
           

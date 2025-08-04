@@ -112,7 +112,36 @@
 .status-section {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 1rem;
+}
+
+.header-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.back-to-main-button {
+  background: #6b7280;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.back-to-main-button:hover {
+  background: #4b5563;
+  transform: translateY(-1px);
+}
+
+.back-to-main-button:active {
+  transform: translateY(0);
 }
 
 .connection-status {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dice1, Dice2, Dice3, Coins, Trophy, Users, ArrowLeft, Plus, Minus, ChevronDown, ChevronRight } from 'lucide-react';
 import { GameRoom, Player, CamelColor, DiceColor, BetType, TrackTileType, DiceResult, BetCard, GameStatus } from '../types/game';
 import { useGameStore } from '../hooks/useGameStore';
@@ -11,6 +11,7 @@ interface GameBoardProps {
   isOnlineMode?: boolean;
   socket?: any;
   sendGameAction?: (action: string, data?: any) => void;
+  onBackToMainMenu?: () => void;
 }
 
 const GameBoard: React.FC<GameBoardProps> = ({ 
@@ -19,7 +20,8 @@ const GameBoard: React.FC<GameBoardProps> = ({
   onLeaveGame, 
   isOnlineMode = false, 
   socket, 
-  sendGameAction 
+  sendGameAction,
+  onBackToMainMenu 
 }) => {
   const { rollDice, placeBet, placeChampionBet, placeLoserBet, placeTrackTile } = useGameStore();
   const [selectedBetType, setSelectedBetType] = useState<BetType>(BetType.ROUND);
@@ -31,8 +33,42 @@ const GameBoard: React.FC<GameBoardProps> = ({
   const [selectedDebugDice, setSelectedDebugDice] = useState<string | null>(null);
   const [selectedDebugSteps, setSelectedDebugSteps] = useState<number | null>(null);
   
+  // 动画状态
+  const [isDiceRolling, setIsDiceRolling] = useState(false);
+  const [movingCamels, setMovingCamels] = useState<Set<string>>(new Set());
+  const [placingBet, setPlacingBet] = useState(false);
+  const [placingTile, setPlacingTile] = useState(false);
+  const [coinChange, setCoinChange] = useState<{playerId: string, amount: number} | null>(null);
+  const [lastAction, setLastAction] = useState<string>('');
+  
   // 检查是否为Garren用户
   const isGarren = currentPlayer.name === 'Garren';
+  
+  // 监听游戏状态变化，触发动画
+  React.useEffect(() => {
+    // 监听骆驼位置变化，触发移动动画
+    const newMovingCamels = new Set<string>();
+    room.camels.forEach((camel) => {
+      // 这里可以添加更复杂的逻辑来检测位置变化
+      if (lastAction.includes('roll')) {
+        newMovingCamels.add(camel.color);
+      }
+    });
+    
+    if (newMovingCamels.size > 0) {
+      setMovingCamels(newMovingCamels);
+      setTimeout(() => setMovingCamels(new Set()), 1000);
+    }
+  }, [room.camels, lastAction]);
+  
+  // 监听玩家金币变化，触发金币动画
+  React.useEffect(() => {
+    const currentPlayerCoins = room.players.find(p => p.id === currentPlayer.id)?.coins;
+    if (currentPlayerCoins !== undefined && lastAction) {
+      setCoinChange({ playerId: currentPlayer.id, amount: currentPlayerCoins });
+      setTimeout(() => setCoinChange(null), 400);
+    }
+  }, [room.players, currentPlayer.id, lastAction]);
   
   const isCurrentPlayerTurn = room.currentPlayerId === currentPlayer.id && room.status !== GameStatus.GAME_END;
   
@@ -80,73 +116,97 @@ const GameBoard: React.FC<GameBoardProps> = ({
   const handleRollDice = () => {
     if (!isCurrentPlayerTurn) return;
     
-    if (isOnlineMode && sendGameAction) {
-      // 在线模式：发送游戏动作到服务器
-      if (debugMode && isGarren && selectedDebugDice && selectedDebugSteps) {
-        sendGameAction('roll-dice', { debugDice: selectedDebugDice, debugSteps: selectedDebugSteps });
-        setSelectedDebugDice(null);
-        setSelectedDebugSteps(null);
+    // 开始骰子滚动动画
+    setIsDiceRolling(true);
+    setLastAction('roll');
+    
+    // 延迟执行实际掷骰子逻辑，让动画播放
+    setTimeout(() => {
+      if (isOnlineMode && sendGameAction) {
+        // 在线模式：发送游戏动作到服务器
+        if (debugMode && isGarren && selectedDebugDice && selectedDebugSteps) {
+          sendGameAction('roll-dice', { debugDice: selectedDebugDice, debugSteps: selectedDebugSteps });
+          setSelectedDebugDice(null);
+          setSelectedDebugSteps(null);
+        } else {
+          sendGameAction('roll-dice');
+        }
       } else {
-        sendGameAction('roll-dice');
+        // 本地模式：直接调用本地游戏逻辑
+        if (debugMode && isGarren && selectedDebugDice && selectedDebugSteps) {
+          rollDice(selectedDebugDice, selectedDebugSteps);
+          setSelectedDebugDice(null);
+          setSelectedDebugSteps(null);
+        } else {
+          rollDice();
+        }
       }
-    } else {
-      // 本地模式：直接调用本地游戏逻辑
-      if (debugMode && isGarren && selectedDebugDice && selectedDebugSteps) {
-        rollDice(selectedDebugDice, selectedDebugSteps);
-        setSelectedDebugDice(null);
-        setSelectedDebugSteps(null);
-      } else {
-        rollDice();
-      }
-    }
+      setIsDiceRolling(false);
+    }, 800);
   };
   
   const handlePlaceBet = (camelColor: CamelColor, betType: BetType) => {
     if (!isCurrentPlayerTurn) return;
     
-    if (isOnlineMode && sendGameAction) {
-      // 在线模式：发送游戏动作到服务器
-      if (betType === BetType.WINNER) {
-        sendGameAction('place-champion-bet', { camelColor });
-      } else if (betType === BetType.LOSER) {
-        sendGameAction('place-loser-bet', { camelColor });
+    // 开始下注动画
+    setPlacingBet(true);
+    setLastAction(`bet-${camelColor}-${betType}`);
+    
+    // 延迟执行实际下注逻辑
+    setTimeout(() => {
+      if (isOnlineMode && sendGameAction) {
+        // 在线模式：发送游戏动作到服务器
+        if (betType === BetType.WINNER) {
+          sendGameAction('place-champion-bet', { camelColor });
+        } else if (betType === BetType.LOSER) {
+          sendGameAction('place-loser-bet', { camelColor });
+        } else {
+          const betCard: BetCard = {
+            id: `${betType}-${camelColor}-${Date.now()}`,
+            type: betType,
+            camelColor,
+            value: 5
+          };
+          sendGameAction('place-bet', { betCard });
+        }
       } else {
-        const betCard: BetCard = {
-          id: `${betType}-${camelColor}-${Date.now()}`,
-          type: betType,
-          camelColor,
-          value: 5
-        };
-        sendGameAction('place-bet', { betCard });
+        // 本地模式：直接调用本地游戏逻辑
+        if (betType === BetType.WINNER) {
+          placeChampionBet(currentPlayer.id, camelColor);
+        } else if (betType === BetType.LOSER) {
+          placeLoserBet(currentPlayer.id, camelColor);
+        } else {
+          const betCard: BetCard = {
+            id: `${betType}-${camelColor}-${Date.now()}`,
+            type: betType,
+            camelColor,
+            value: 5
+          };
+          placeBet(currentPlayer.id, betCard);
+        }
       }
-    } else {
-      // 本地模式：直接调用本地游戏逻辑
-      if (betType === BetType.WINNER) {
-        placeChampionBet(currentPlayer.id, camelColor);
-      } else if (betType === BetType.LOSER) {
-        placeLoserBet(currentPlayer.id, camelColor);
-      } else {
-        const betCard: BetCard = {
-          id: `${betType}-${camelColor}-${Date.now()}`,
-          type: betType,
-          camelColor,
-          value: 5
-        };
-        placeBet(currentPlayer.id, betCard);
-      }
-    }
+      setPlacingBet(false);
+    }, 600);
   };
   
   const handlePlaceTrackTile = (position: number, tileType: TrackTileType) => {
     if (!isCurrentPlayerTurn || position < 1 || position > 15) return;
     
-    if (isOnlineMode && sendGameAction) {
-      // 在线模式：发送游戏动作到服务器
-      sendGameAction('place-track-tile', { position, tileType });
-    } else {
-      // 本地模式：直接调用本地游戏逻辑
-      placeTrackTile(currentPlayer.id, position, tileType);
-    }
+    // 开始瓦片放置动画
+    setPlacingTile(true);
+    setLastAction(`tile-${position}-${tileType}`);
+    
+    // 延迟执行实际放置逻辑
+    setTimeout(() => {
+      if (isOnlineMode && sendGameAction) {
+        // 在线模式：发送游戏动作到服务器
+        sendGameAction('place-track-tile', { position, tileType });
+      } else {
+        // 本地模式：直接调用本地游戏逻辑
+        placeTrackTile(currentPlayer.id, position, tileType);
+      }
+      setPlacingTile(false);
+    }, 500);
   };
   
   // 渲染赛道格子
@@ -176,7 +236,9 @@ const GameBoard: React.FC<GameBoardProps> = ({
         
         {/* 赛道瓦片 */}
         {trackTile && (
-          <div className={`track-tile ${trackTile.type}`}>
+          <div className={`track-tile ${trackTile.type} transition-smooth hover-lift ${
+            placingTile && lastAction.includes(`tile-${position}-${trackTile.type}`) ? 'placing animate-tile-place' : ''
+          }`}>
             {trackTile.type === 'accelerate' ? '+' : '-'}
           </div>
         )}
@@ -189,7 +251,9 @@ const GameBoard: React.FC<GameBoardProps> = ({
               .map((camel, index) => (
                 <div
                   key={camel.color}
-                  className={`camel-piece ${camelColors[camel.color]}`}
+                  className={`camel-piece ${camelColors[camel.color]} transition-smooth ${
+                    movingCamels.has(camel.color) ? 'moving animate-camel-move' : ''
+                  }`}
                   style={{ 
                     zIndex: index + 1,
                     transform: `translateY(-${index * 12}px)`
@@ -206,22 +270,40 @@ const GameBoard: React.FC<GameBoardProps> = ({
   };
   
   return (
-    <div style={{minHeight: '100vh', padding: '16px'}}>
-      <div className="container">
+    <div className="animate-fade-in" style={{minHeight: '100vh', padding: '16px'}}>
+      <div className="container animate-slide-in">
         {/* 游戏标题栏 */}
         <div className="card" style={{marginBottom: '16px'}}>
           <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
             <div style={{display: 'flex', alignItems: 'center', gap: '16px'}}>
-              <button
-                onClick={onLeaveGame}
-                className="btn btn-secondary"
-              >
-                <ArrowLeft size={20} />
-              </button>
+              <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                <button
+                  onClick={onLeaveGame}
+                  className="btn btn-secondary"
+                  title="离开游戏"
+                >
+                  <ArrowLeft size={20} />
+                </button>
+                {onBackToMainMenu && (
+                  <button
+                    onClick={onBackToMainMenu}
+                    className="btn btn-secondary"
+                    title="返回主菜单"
+                    style={{fontSize: '14px', padding: '8px 12px'}}
+                  >
+                    主菜单
+                  </button>
+                )}
+              </div>
               <div>
                 <h1 style={{fontSize: '20px', fontWeight: 'bold'}}>{room.name}</h1>
-                <div style={{color: '#6b7280'}}>
-                  第 {room.round + 1} 轮 | 当前玩家: {room.players.find(p => p.id === room.currentPlayerId)?.name}
+                <div className="game-status animate-fade-in" style={{color: '#6b7280'}}>
+                  <span className="round-info animate-slide-in">第 {room.round + 1} 轮</span> | 
+                  <span className={`current-player animate-status-change ${
+                    room.currentPlayerId === currentPlayer.id ? 'animate-glow' : ''
+                  }`}>
+                    当前玩家: {room.players.find(p => p.id === room.currentPlayerId)?.name}
+                  </span>
                 </div>
               </div>
             </div>
@@ -273,10 +355,46 @@ const GameBoard: React.FC<GameBoardProps> = ({
             {/* 玩家列表 */}
             <div className="card">
               <h2 style={{fontSize: '20px', fontWeight: 'bold', marginBottom: '16px'}}>玩家状态</h2>
+              
+              {/* 排行榜 */}
+              <div className="leaderboard animate-fade-in" style={{marginBottom: '16px', padding: '12px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0'}}>
+                <h3 style={{fontSize: '16px', fontWeight: '600', marginBottom: '12px', color: '#374151'}}>排行榜</h3>
+                {room.players
+                  .sort((a, b) => b.coins - a.coins)
+                  .map((player, index) => (
+                    <div 
+                      key={player.id} 
+                      className={`leaderboard-item transition-smooth ${
+                        coinChange?.playerId === player.id ? 'animate-ranking-update' : ''
+                      }`}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '8px 12px',
+                        marginBottom: '4px',
+                        backgroundColor: index === 0 ? '#fef3c7' : '#ffffff',
+                        borderRadius: '6px',
+                        border: '1px solid',
+                        borderColor: index === 0 ? '#f59e0b' : '#e5e7eb'
+                      }}
+                    >
+                      <div className="rank" style={{fontWeight: '600', color: index === 0 ? '#92400e' : '#6b7280'}}>#{index + 1}</div>
+                      <div className="player-name" style={{fontWeight: '500', color: '#374151'}}>{player.name}</div>
+                      <div className={`player-coins ${
+                        coinChange?.playerId === player.id ? 'animate-number-pop' : ''
+                      }`} style={{fontWeight: '600', color: index === 0 ? '#92400e' : '#6b7280'}}>{player.coins}</div>
+                    </div>
+                  ))}
+              </div>
+              
               <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '16px'}}>
                 {room.players.map((player) => (
                   <div
                     key={player.id}
+                    className={`transition-smooth ${
+                      room.currentPlayerId === player.id ? 'animate-glow' : ''
+                    }`}
                     style={{
                       padding: '16px',
                       borderRadius: '8px',
@@ -289,7 +407,9 @@ const GameBoard: React.FC<GameBoardProps> = ({
                       {player.name}
                       {player.id === currentPlayer.id && ' (你)'}
                     </div>
-                    <div style={{color: '#6b7280', marginTop: '4px', fontSize: '14px'}}>
+                    <div className={`${
+                      coinChange?.playerId === player.id ? 'animate-number-pop' : ''
+                    }`} style={{color: '#6b7280', marginTop: '4px', fontSize: '14px'}}>
                       金币: {player.coins}
                     </div>
                     <div style={{color: '#6b7280', fontSize: '14px'}}>
@@ -573,16 +693,20 @@ const GameBoard: React.FC<GameBoardProps> = ({
                   {/* 掷骰子 */}
                   <button
                     onClick={handleRollDice}
-                    disabled={!isCurrentPlayerTurn || room.availableDice.length === 0 || (room.usedDice?.length || 0) >= 5 || room.status === GameStatus.GAME_END || (debugMode && isGarren && (!selectedDebugDice || !selectedDebugSteps))}
-                    className="btn btn-primary"
+                    disabled={!isCurrentPlayerTurn || room.availableDice.length === 0 || (room.usedDice?.length || 0) >= 5 || room.status === GameStatus.GAME_END || (debugMode && isGarren && (!selectedDebugDice || !selectedDebugSteps)) || isDiceRolling}
+                    className={`btn btn-primary transition-smooth hover-lift ${
+                      isDiceRolling ? 'animate-pulse' : ''
+                    }`}
                     style={{padding: '12px', width: '100%'}}
+                    onMouseDown={(e) => e.currentTarget.classList.add('animate-button-press')}
+                    onMouseUp={(e) => e.currentTarget.classList.remove('animate-button-press')}
                   >
                     <Dice1 size={20} />
-                    {debugMode && isGarren ? 
+                    {isDiceRolling ? '掷骰中...' : (debugMode && isGarren ? 
                       (selectedDebugDice && selectedDebugSteps ? 
                         `掷${selectedDebugDice.toUpperCase()}骰子(${selectedDebugSteps}点)` : 
                         '请选择骰子和点数') : 
-                      '掷骰子'}
+                      '掷骰子')}
                   </button>
                   
                   {/* 投注区域 */}
@@ -646,7 +770,9 @@ const GameBoard: React.FC<GameBoardProps> = ({
                           <button
                             key={color}
                             onClick={() => handlePlaceBet(color, selectedBetType)}
-                            className={`bet-card ${hasAlreadyBet ? 'btn-secondary' : camelColors[color]}`}
+                            className={`bet-card ${hasAlreadyBet ? 'btn-secondary' : camelColors[color]} transition-smooth hover-lift ${
+                              placingBet && lastAction.includes(`bet-${color}-${selectedBetType}`) ? 'placing animate-card-fly-in' : ''
+                            }`}
                             style={{
                               height: '80px',
                               fontSize: '14px',
@@ -761,7 +887,7 @@ const GameBoard: React.FC<GameBoardProps> = ({
                 <div style={{marginTop: '16px', padding: '16px', borderRadius: '8px', background: '#eff6ff', border: '1px solid #3b82f6'}}>
                   <div style={{fontSize: '14px', color: '#1e40af'}}>
                     上次掷骰: 
-                    <span className={diceColors[room.lastDiceResult.diceColor]} style={{margin: '0 4px', padding: '2px 6px', borderRadius: '4px'}}>
+                    <span className={`${diceColors[room.lastDiceResult.diceColor]} transition-smooth ${isDiceRolling ? 'rolling animate-dice-roll' : ''}`} style={{margin: '0 4px', padding: '2px 6px', borderRadius: '4px'}}>
                       🎲
                     </span>
                     → {camelEmojis[room.lastDiceResult.camelColor]} 
@@ -844,6 +970,71 @@ const GameBoard: React.FC<GameBoardProps> = ({
         players={room.players}
         onClose={onLeaveGame}
       />
+      
+      {/* 游戏结束状态显示 */}
+      {room.status === GameStatus.GAME_END && (
+        <div className="victory-display animate-zoom-in" style={{
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+          padding: '32px',
+          borderRadius: '16px',
+          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+          zIndex: 1000,
+          textAlign: 'center',
+          minWidth: '400px'
+        }}>
+          <h2 className="animate-bounce" style={{
+            fontSize: '32px',
+            marginBottom: '24px',
+            color: '#059669'
+          }}>🎉 游戏结束！</h2>
+          <div className="final-rankings animate-slide-up">
+            <h3 style={{
+              fontSize: '20px',
+              marginBottom: '16px',
+              color: '#374151'
+            }}>最终排名：</h3>
+            {room.players
+              .sort((a, b) => b.coins - a.coins)
+              .map((player, index) => (
+                <div 
+                  key={player.id} 
+                  className={`ranking-item animate-slide-in transition-smooth ${
+                    index === 0 ? 'animate-glow' : ''
+                  }`}
+                  style={{ 
+                    animationDelay: `${index * 0.1}s`,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '12px 16px',
+                    marginBottom: '8px',
+                    backgroundColor: index === 0 ? '#fef3c7' : '#f9fafb',
+                    borderRadius: '8px',
+                    border: '1px solid',
+                    borderColor: index === 0 ? '#f59e0b' : '#e5e7eb'
+                  }}
+                >
+                  <span className="rank" style={{
+                    fontWeight: '600',
+                    color: index === 0 ? '#92400e' : '#6b7280'
+                  }}>#{index + 1}</span>
+                  <span className="name" style={{
+                    fontWeight: '500',
+                    color: '#374151'
+                  }}>{player.name}</span>
+                  <span className="coins animate-number-pop" style={{
+                    fontWeight: '600',
+                    color: index === 0 ? '#92400e' : '#6b7280'
+                  }}>{player.coins} 金币</span>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
